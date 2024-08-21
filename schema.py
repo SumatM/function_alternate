@@ -1,12 +1,15 @@
 from google.cloud import bigquery
 from google.oauth2 import service_account
+from google.api_core.exceptions import NotFound
 
 service_account_file = "cred.json"
 credentials = service_account.Credentials.from_service_account_file(
     service_account_file
 )
 
+
 client = bigquery.Client(credentials=credentials, project=credentials.project_id)
+
 
 
 """
@@ -47,25 +50,25 @@ whitelisted_userSchema= [
 
 
 
-
 def create_user_table():
-    
-
-    project_id = "your-project-id"
-    dataset_id = "your-dataset-name"
-    table_name = "your-table-name"
-
+    project_id = "jobbot-415816"
+    dataset_id = "sumat_demo_tft"
+    table_name = "locationss"
     table_id = f"{project_id}.{dataset_id}.{table_name}"
 
+    try:
+        table = client.get_table(table_id)
+        print(f"Table {table_id} already exists.")
+    except NotFound:
+        schema = locationSchema
+
+        table = bigquery.Table(table_id, schema=schema)
+        table = client.create_table(table)
+        print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
+    except Exception as e:
+        print(e,"Error while creating table")
 
 
-    schema = locationSchema
-
-
-
-    table = bigquery.Table(table_id, schema=schema)
-    table = client.create_table(table)  #
-    print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
 
 if __name__ == "__main__":
     create_user_table()
